@@ -1,6 +1,7 @@
 use core::ops::Range;
+use std::borrow::Cow;
 
-use markdown::{mdast::Node, unist::Position};
+use markdown::{self as md, mdast::Node, unist::Position};
 use once_cell::sync::Lazy;
 use regex::Regex;
 
@@ -23,7 +24,7 @@ pub fn get_links(node: &Node, content: &str) -> Vec<Range<usize>> {
         let md_range_start = md_range.start;
         let md_link = &content[md_range]; // str of markdown link
         // Try given pattens to extract url from markdown syntax
-        let Some(caps) = regexes.into_iter().find_map(|re| re.captures(md_link)) else {
+        let Some(caps) = regexes.iter().find_map(|re| re.captures(md_link)) else {
             panic!("Parser Error: '{md_link}' is not a valid markdown link.");
         };
         let m = caps
@@ -57,4 +58,26 @@ pub fn get_links(node: &Node, content: &str) -> Vec<Range<usize>> {
         }
     };
     links
+}
+
+pub fn replace_links<'a>(content: &'a str, replacements: &[(Regex, &str)]) -> Cow<'a, str> {
+    let ast = md::to_mdast(content, &Default::default()).unwrap();
+
+    let mut state: Option<(String, usize)> = None;
+    for link in get_links(&ast, content) {
+        for (re, replacement) in replacements {
+            let link_str = content[link.clone()].trim();
+            // If there is a match, replace the link in a new string.
+            if let Cow::Owned(new_link) = re.replace(link_str, *replacement) {
+                let (new_content, cursor) = state.take().unwrap_or((String::new(), 0));
+                state = Some((new_content + &content[cursor..link.start] + &new_link, link.end));
+                break;
+            }
+        }
+    }
+    if let Some((new_content, _)) = state {
+        Cow::Owned(new_content)
+    } else {
+        Cow::Borrowed(content)
+    }
 }
