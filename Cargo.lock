@@ -929,7 +929,6 @@ dependencies = [
  "clap",
  "mdbook",
  "mdutil-lib",
- "regex",
  "semver",
  "serde_json",
  "toml",

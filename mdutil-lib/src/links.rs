@@ -64,21 +64,17 @@ pub fn get_links(node: &Node, content: &str) -> Vec<Range<usize>> {
 pub fn replace_links<'a>(
     content: &'a str,
     ast: &Node,
-    replacements: &[(Regex, &str)],
+    replacement: impl Fn(&str) -> Option<String>,
 ) -> Cow<'a, str> {
     let mut state: Option<(String, usize)> = None;
     for link in get_links(ast, content) {
-        for (re, replacement) in replacements {
-            let link_str = content[link.clone()].trim();
-            // If there is a match, replace the link in a new string.
-            if let Cow::Owned(new_link) = re.replace(link_str, *replacement) {
-                let (new_content, cursor) = state.take().unwrap_or((String::new(), 0));
-                state = Some((
-                    new_content + &content[cursor..link.start] + &new_link,
-                    link.end,
-                ));
-                break;
-            }
+        let link_str = content[link.clone()].trim();
+        if let Some(new_link) = replacement(link_str) {
+            let (new_content, cursor) = state.take().unwrap_or((String::new(), 0));
+            state = Some((
+                new_content + &content[cursor..link.start] + &new_link,
+                link.end,
+            ));
         }
     }
     if let Some((mut new_content, idx)) = state {
@@ -87,6 +83,23 @@ pub fn replace_links<'a>(
     } else {
         Cow::Borrowed(content)
     }
+}
+
+pub fn regexreplace_links<'a>(
+    content: &'a str,
+    ast: &Node,
+    replacements: &[(Regex, &str)],
+) -> Cow<'a, str> {
+    let replacement_fn = move |link: &str| {
+        for (re, replacement) in replacements {
+            // If there is a match, replace the link in a new string.
+            if let Cow::Owned(new_link) = re.replace(link, *replacement) {
+                return Some(new_link);
+            }
+        }
+        None
+    };
+    replace_links(content, ast, replacement_fn)
 }
 
 #[cfg(test)]
@@ -102,7 +115,7 @@ mod test {
 
         let ast = md::to_mdast(input, &Default::default()).unwrap();
         let replacements = [(Regex::new(".*")?, "https://hugom.uk")];
-        let actual = replace_links(input, &ast, &replacements);
+        let actual = regexreplace_links(input, &ast, &replacements);
 
         assert_eq!(actual, expected);
 
