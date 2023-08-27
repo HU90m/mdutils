@@ -923,17 +923,25 @@ dependencies = [
 
 [[package]]
 name = "mdbook-regexreplace"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "anyhow",
  "clap",
- "markdown",
  "mdbook",
- "once_cell",
+ "mdutil-lib",
  "regex",
  "semver",
  "serde_json",
  "toml",
+]
+
+[[package]]
+name = "mdutil-lib"
+version = "0.0.1"
+dependencies = [
+ "markdown",
+ "once_cell",
+ "regex",
 ]
 
 [[package]]

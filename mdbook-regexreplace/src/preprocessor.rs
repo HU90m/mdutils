@@ -1,13 +1,11 @@
 use std::borrow::Cow;
 
 use anyhow::{anyhow, Result};
-use markdown as md;
 use mdbook::book::{Book, BookItem};
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
-use regex::Regex;
 use toml::value::{Table, Value};
 
-use super::md_utils::replace_links;
+use mdutil_lib::{links::replace_links, markdown as md, regex::Regex};
 
 /// A no-op preprocessor.
 pub struct RegexReplace;
@@ -92,7 +90,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn nop_preprocessor_run() -> Result<()> {
+    fn preprocessor_run() -> Result<()> {
         let input_json = r##"
         [
             {

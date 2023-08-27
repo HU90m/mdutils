@@ -1,4 +1,3 @@
-mod md_utils;
 mod preprocessor;
 
 use std::{io, process};
