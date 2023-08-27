@@ -6,3 +6,6 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.75"
 clap = { version = "4.4.0", features = ["deprecated", "derive"] }
+mdutil-lib = { path = "../mdutil-lib", version = "0.0.1" }
+pathdiff = "0.2.1"
+url = "2.4.1"

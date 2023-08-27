@@ -4,11 +4,12 @@ use std::borrow::Cow;
 use markdown::mdast::Node;
 use once_cell::sync::Lazy;
 use regex::Regex;
+use anyhow::Result;
 
 use super::pos_to_range;
 
 /// Extracts links from an abstract syntax tree.
-pub fn get_links(node: &Node, content: &str) -> Vec<Range<usize>> {
+pub fn get_links(content: &str, node: &Node) -> Vec<Range<usize>> {
     /// <https://spec.commonmark.org/0.30/#inline-link>
     static INLINE_LINK: Lazy<Regex> =
         Lazy::new(|| Regex::new(r"(?s)^\[.*\]\((?:\s*<)?(.*)(?:>\s*)?\)$").unwrap());
@@ -53,21 +54,22 @@ pub fn get_links(node: &Node, content: &str) -> Vec<Range<usize>> {
 
     if let Some(children) = node.children() {
         for node in children {
-            links.extend(get_links(node, content));
+            links.extend(get_links(content, node));
         }
     };
     links
 }
 
+/// Will only error if `replacement` returns an error.
 pub fn replace_links<'a>(
     content: &'a str,
     ast: &Node,
-    replacement: impl Fn(&str) -> Option<String>,
-) -> Cow<'a, str> {
+    replacement: impl Fn(&str) -> Result<Option<String>>,
+) -> Result<Cow<'a, str>> {
     let mut state: Option<(String, usize)> = None;
-    for link in get_links(ast, content) {
+    for link in get_links(content, ast) {
         let link_str = content[link.clone()].trim();
-        if let Some(new_link) = replacement(link_str) {
+        if let Some(new_link) = replacement(link_str)? {
             let (new_content, cursor) = state.take().unwrap_or((String::new(), 0));
             state = Some((
                 new_content + &content[cursor..link.start] + &new_link,
@@ -77,9 +79,9 @@ pub fn replace_links<'a>(
     }
     if let Some((mut new_content, idx)) = state {
         new_content += &content[idx..];
-        Cow::Owned(new_content)
+        Ok(Cow::Owned(new_content))
     } else {
-        Cow::Borrowed(content)
+        Ok(Cow::Borrowed(content))
     }
 }
 
@@ -92,12 +94,13 @@ pub fn regexreplace_links<'a>(
         for (re, replacement) in replacements {
             // If there is a match, replace the link in a new string.
             if let Cow::Owned(new_link) = re.replace(link, *replacement) {
-                return Some(new_link);
+                return Ok(Some(new_link));
             }
         }
-        None
+        Ok(None)
     };
-    replace_links(content, ast, replacement_fn)
+    // Replacement_fn can't error so, replace_links won't error.
+    replace_links(content, ast, replacement_fn).unwrap()
 }
 
 #[cfg(test)]
