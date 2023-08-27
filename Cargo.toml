@@ -1,7 +1,8 @@
 [workspace]
 resolver = "2"
 members = [
-    "mdbook-regexreplace",
     "mdutil-lib",
+    "mdmove",
     "mdsummary",
+    "mdbook-regexreplace",
 ]

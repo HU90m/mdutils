@@ -1,0 +1,8 @@
+[package]
+name = "mdmove"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.75"
+clap = { version = "4.4.0", features = ["deprecated", "derive"] }
