@@ -3,4 +3,5 @@ resolver = "2"
 members = [
     "mdbook-regexreplace",
     "mdutil-lib",
+    "mdsummary",
 ]
