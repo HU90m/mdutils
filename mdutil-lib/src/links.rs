@@ -1,13 +1,11 @@
 use core::ops::Range;
 use std::borrow::Cow;
 
-use markdown::{mdast::Node, unist::Position};
+use markdown::mdast::Node;
 use once_cell::sync::Lazy;
 use regex::Regex;
 
-const fn pos_to_range(pos: &Position) -> Range<usize> {
-    pos.start.offset..pos.end.offset
-}
+use super::pos_to_range;
 
 /// Extracts links from an abstract syntax tree.
 pub fn get_links(node: &Node, content: &str) -> Vec<Range<usize>> {
