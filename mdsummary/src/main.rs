@@ -1,6 +1,7 @@
 use anyhow::{bail, Result};
 use clap::Parser;
 use std::borrow::Cow;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
@@ -136,14 +137,20 @@ fn resolve_links(path: &Path) -> Result<Cow<'_, Path>> {
 
 fn main() -> Result<()> {
     let opts = Options::parse();
-    let dir = match opts.dir {
+    let mut dir = match opts.dir {
         Some(dir) if dir.is_dir() => dir,
         Some(file) => bail!("{} is not a directory.", file.display()),
         None => env::current_dir()?,
     };
-    env::set_current_dir(dir)?;
-    let n = Summary::from_dir(&PathBuf::from("."))?;
-    println!("{}", n.render_to_md());
+    env::set_current_dir(&dir)?;
+    let new_summary = Summary::from_dir(&PathBuf::from("."))?.render_to_md();
 
-    Ok(())
+    dir.push("SUMMARY.md");
+    println!("Writing summary to {}", dir.display());
+    fs::OpenOptions::new()
+        .write(true)
+        .create(true)
+        .open("SUMMARY.md")?
+        .write_all(new_summary.as_bytes())
+        .map_err(Into::into)
 }
