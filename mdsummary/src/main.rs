@@ -1,6 +1,7 @@
 use anyhow::{bail, Result};
 use clap::Parser;
 use std::borrow::Cow;
+use std::ffi::OsStr;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
@@ -113,11 +114,13 @@ impl Summary {
 fn title_from_md_file(path: &Path) -> Result<String> {
     let content = fs::read_to_string(path)?;
     let ast = md::to_mdast(&content, &Default::default()).unwrap();
-    let title = get_title(&ast, &content);
-    if let Some(title) = title {
+    if let Some(title) = get_title(&ast, &content) {
         Ok(title.to_string())
     } else {
-        bail!("{} doesn't contain a title", path.display())
+        let Some(name) = path.file_stem().and_then(OsStr::to_str) else {
+            bail!("Can't generate a title from this path: {}", path.display())
+        };
+        Ok(name.to_string())
     }
 }
 
