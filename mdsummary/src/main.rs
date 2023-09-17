@@ -20,13 +20,13 @@ struct Options {
 struct Node {
     title: String,
     path: Option<PathBuf>,
-    sub_nodes: Option<Vec<Node>>,
+    sub_nodes: Vec<Node>,
 }
 impl Node {
-    fn from_dir(dir: &Path, default_title: String) -> Result<Self> {
+    fn from_dir(dir: &Path, default_title: String) -> Result<Option<Self>> {
         let mut title = default_title;
         let mut index_path = None;
-        let mut sub_nodes = None;
+        let mut sub_nodes = Vec::new();
         for entry_res in fs::read_dir(dir)? {
             let entry = entry_res?;
             let fs_name = entry.file_name();
@@ -38,16 +38,19 @@ impl Node {
                 title = title_from_md_file(&path)?;
                 index_path = Some(path);
             } else if let Some(node) = Self::from_entry(&entry)? {
-                sub_nodes
-                    .get_or_insert_with(Vec::<Node>::default)
-                    .push(node);
+                sub_nodes.push(node);
             }
         }
-        Ok(Node {
-            title,
-            path: index_path,
-            sub_nodes,
-        })
+        if sub_nodes.is_empty() {
+            // Ignore directory if it doesn't contain any markdown files.
+            Ok(None)
+        } else {
+            Ok(Some(Node {
+                title,
+                path: index_path,
+                sub_nodes,
+            }))
+        }
     }
 
     fn from_entry(entry: &fs::DirEntry) -> Result<Option<Node>> {
@@ -56,12 +59,12 @@ impl Node {
         let path_real = resolve_links(&path)?;
         let node = if path_real.is_dir() {
             let fs_name = fs_name.to_string_lossy().to_string();
-            Self::from_dir(&path_real, fs_name)?
+            return Self::from_dir(&path_real, fs_name);
         } else if path.extension().is_some_and(|ext| ext == "md") && fs_name != "SUMMARY.md" {
             Self {
                 title: title_from_md_file(&path_real)?,
                 path: Some(path),
-                sub_nodes: None,
+                sub_nodes: Vec::new(),
             }
         } else {
             return Ok(None);
@@ -80,11 +83,8 @@ impl Node {
         out.extend(std::iter::repeat("  ").take(depth));
         *out += &format!("- [{}]({})\n", self.title, path);
 
-        if let Some(sub_nodes) = &self.sub_nodes {
-            for node in sub_nodes.iter() {
-                node.render_to_md(depth + 1, out);
-            }
-            out.push('\n');
+        for node in &self.sub_nodes {
+            node.render_to_md(depth + 1, out);
         }
     }
 }
