@@ -41,7 +41,7 @@ impl Node {
                 sub_nodes.push(node);
             }
         }
-        if sub_nodes.is_empty() {
+        if sub_nodes.is_empty() && index_path.is_none() {
             // Ignore directory if it doesn't contain any markdown files.
             Ok(None)
         } else {
