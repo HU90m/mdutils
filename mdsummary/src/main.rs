@@ -72,13 +72,20 @@ impl Node {
         Ok(Some(node))
     }
 
+    fn sort(&mut self) {
+        for sub_node in &mut self.sub_nodes {
+            sub_node.sort()
+        }
+        self.sub_nodes.sort_by(|a, b| a.title.cmp(&b.title));
+    }
+
     fn render_to_md(&self, depth: usize, out: &mut String) {
         let path = self
             .path
             .as_ref()
             .map(|p| p.to_string_lossy())
             .map(|p| p.to_string())
-            .unwrap_or_else(String::new);
+            .unwrap_or_default();
 
         out.extend(std::iter::repeat("  ").take(depth));
         *out += &format!("- [{}]({})\n", self.title, path);
@@ -100,6 +107,14 @@ impl Summary {
             }
         }
         Ok(Self(nodes))
+    }
+
+    fn sort(mut self) -> Self {
+        for node in &mut self.0 {
+            node.sort()
+        }
+        self.0.sort_by(|a, b| a.title.cmp(&b.title));
+        self
     }
 
     fn render_to_md(&self) -> String {
@@ -146,7 +161,9 @@ fn main() -> Result<()> {
         None => env::current_dir()?,
     };
     env::set_current_dir(&dir)?;
-    let new_summary = Summary::from_dir(&PathBuf::from("."))?.render_to_md();
+    let new_summary = Summary::from_dir(&PathBuf::from("."))?
+        .sort()
+        .render_to_md();
 
     dir.push("SUMMARY.md");
     println!("Writing summary to {}", dir.display());
