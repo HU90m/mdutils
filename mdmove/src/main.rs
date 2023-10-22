@@ -60,7 +60,10 @@ fn main() -> Result<()> {
         root,
         dry_run,
     } = Cli::parse();
-    let destination = paths.pop().unwrap();
+    let mut destination = paths.pop().unwrap();
+    if destination.is_relative() {
+        destination = normalize_path(&env::current_dir()?.join(destination));
+    }
     let sources = paths;
     let root = root
         .map(|r| r.canonicalize())
@@ -95,8 +98,6 @@ fn main() -> Result<()> {
 }
 
 fn get_move_list(mut sources: Vec<PathBuf>, destination: PathBuf) -> Result<MoveList> {
-    let destination = destination.canonicalize()?;
-
     if sources.len() == 1 {
         // ok to unwrap because the length is checked above
         let source = sources.pop().unwrap().canonicalize()?;
