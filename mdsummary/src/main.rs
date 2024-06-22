@@ -13,6 +13,9 @@ use mdutil_lib::markdown as md;
 struct Options {
     #[arg(id = "directory")]
     dir: Option<PathBuf>,
+    /// Update the SUMMARY.md, if it is out of date.
+    #[arg(short, long)]
+    update: bool,
 }
 
 #[allow(unused)]
@@ -166,11 +169,21 @@ fn main() -> Result<()> {
         .render_to_md();
 
     dir.push("SUMMARY.md");
-    println!("Writing summary to {}", dir.display());
-    fs::OpenOptions::new()
-        .write(true)
-        .create(true)
-        .open("SUMMARY.md")?
-        .write_all(new_summary.as_bytes())
-        .map_err(Into::into)
+    if opts.update {
+        println!("Writing summary to {}", dir.display());
+        fs::OpenOptions::new()
+            .write(true)
+            .create(true)
+            .open("SUMMARY.md")?
+            .write_all(new_summary.as_bytes())
+            .map_err(Into::into)
+    } else {
+        let Ok(current_summary) = fs::read_to_string("SUMMARY.md") else {
+            bail!("Couldn't find or open {}", dir.display());
+        };
+        if new_summary != current_summary {
+            bail!("{} is out of date", dir.display());
+        }
+        Ok(())
+    }
 }
