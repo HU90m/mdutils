@@ -9,6 +9,8 @@ use std::{env, fs};
 use mdutil_lib::headings::get_title;
 use mdutil_lib::markdown as md;
 
+use prettydiff;
+
 #[derive(Parser)]
 struct Options {
     #[arg(id = "directory")]
@@ -182,7 +184,8 @@ fn main() -> Result<()> {
             bail!("Couldn't find or open {}", dir.display());
         };
         if new_summary != current_summary {
-            bail!("{} is out of date", dir.display());
+            let diff = prettydiff::text::diff_lines(&current_summary, &new_summary);
+            bail!("{} is out of date\n{diff}", dir.display());
         }
         Ok(())
     }
