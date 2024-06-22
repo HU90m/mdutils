@@ -1,5 +1,5 @@
-use markdown::mdast::{Node, Heading};
 use super::pos_to_range;
+use markdown::mdast::{Heading, Node};
 
 /// Extracts the title from an abstract syntax tree.
 pub fn get_title<'a>(node: &Node, content: &'a str) -> Option<&'a str> {
@@ -9,12 +9,11 @@ pub fn get_title<'a>(node: &Node, content: &'a str) -> Option<&'a str> {
                 depth: 1,
                 position: Some(pos),
                 ..
-            }) = node {
+            }) = node
+            {
                 let range = pos_to_range(pos);
-                let title = &content[range]
-                    .trim_start_matches('#')
-                    .trim();
-                return Some(title)
+                let title = &content[range].trim_start_matches('#').trim();
+                return Some(title);
             }
         }
     };

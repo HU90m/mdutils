@@ -2,14 +2,13 @@ use anyhow::{bail, Result};
 use clap::Parser;
 use std::borrow::Cow;
 use std::ffi::OsStr;
-use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
 use mdutil_lib::headings::get_title;
 use mdutil_lib::markdown as md;
 
-use prettydiff;
+const SUMMARY_MD: &str = "SUMMARY.md";
 
 #[derive(Parser)]
 struct Options {
@@ -170,17 +169,12 @@ fn main() -> Result<()> {
         .sort()
         .render_to_md();
 
-    dir.push("SUMMARY.md");
+    dir.push(SUMMARY_MD);
     if opts.update {
         println!("Writing summary to {}", dir.display());
-        fs::OpenOptions::new()
-            .write(true)
-            .create(true)
-            .open("SUMMARY.md")?
-            .write_all(new_summary.as_bytes())
-            .map_err(Into::into)
+        fs::write(SUMMARY_MD, new_summary).map_err(Into::into)
     } else {
-        let Ok(current_summary) = fs::read_to_string("SUMMARY.md") else {
+        let Ok(current_summary) = fs::read_to_string(SUMMARY_MD) else {
             bail!("Couldn't find or open {}", dir.display());
         };
         if new_summary != current_summary {

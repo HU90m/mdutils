@@ -1,10 +1,10 @@
 use core::ops::Range;
 use std::borrow::Cow;
 
+use anyhow::Result;
 use markdown::mdast::Node;
 use once_cell::sync::Lazy;
 use regex::Regex;
-use anyhow::Result;
 
 use super::pos_to_range;
 

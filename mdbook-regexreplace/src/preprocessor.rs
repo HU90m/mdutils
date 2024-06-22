@@ -22,7 +22,7 @@ impl RegexReplace {
     ) -> Result<Vec<(Regex, &'a str)>> {
         let mut replacements = Vec::new();
         let Some(val) = preproc_cfg.get(rep_type) else {
-            return Ok(replacements)
+            return Ok(replacements);
         };
 
         let err_msg = || {
@@ -39,13 +39,9 @@ impl RegexReplace {
             let Value::Table(tab) = val else {
                 return err_msg();
             };
-            let (
-                Some(Value::String(pattern)),
-                Some(Value::String(replacement)),
-            ) = (
-                tab.get("regex"),
-                tab.get("replacement"),
-            ) else {
+            let (Some(Value::String(pattern)), Some(Value::String(replacement))) =
+                (tab.get("regex"), tab.get("replacement"))
+            else {
                 return err_msg();
             };
             replacements.push((Regex::new(pattern)?, replacement))
@@ -61,7 +57,7 @@ impl Preprocessor for RegexReplace {
 
     fn run(&self, ctx: &PreprocessorContext, mut book: Book) -> Result<Book> {
         let Some(preproc_cfg) = ctx.config.get_preprocessor(self.name()) else {
-            return Ok(book)
+            return Ok(book);
         };
         let replacements = self.get_replacements(preproc_cfg, "link_replacements")?;
 
@@ -136,7 +132,7 @@ mod test {
         let mut expected = book.clone();
         expected.for_each_mut(|book_item| {
             let BookItem::Chapter(chapter) = book_item else {
-                return
+                return;
             };
             chapter.content = "[foo](https://hugom.uk) <https://hugom.uk>\n".to_string();
         });
