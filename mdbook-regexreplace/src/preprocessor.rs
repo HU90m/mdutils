@@ -5,9 +5,10 @@ use mdbook::book::{Book, BookItem};
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
 use toml::value::{Table, Value};
 
-use mdutil_lib::{links::regexreplace_links, markdown as md, regex::Regex};
+use mdutil_lib::{links::replace_links, markdown as md, regex::Regex};
+use relative_path::PathExt;
+use url::Url;
 
-/// A no-op preprocessor.
 pub struct RegexReplace;
 
 impl RegexReplace {
@@ -59,15 +60,53 @@ impl Preprocessor for RegexReplace {
         let Some(preproc_cfg) = ctx.config.get_preprocessor(self.name()) else {
             return Ok(book);
         };
-        let replacements = self.get_replacements(preproc_cfg, "link_replacements")?;
+        let link_replacements = self.get_replacements(preproc_cfg, "link_replacements")?;
+        let local_link_replacements =
+            self.get_replacements(preproc_cfg, "local_link_replacements")?;
 
         let regex_replace = |book_item: &mut BookItem| {
             let BookItem::Chapter(chapter) = book_item else {
                 return;
             };
+            let chapter_path_opt = chapter.path.as_ref().map(|chapter_file| {
+                let mut path = ctx.root.clone();
+                path.push(chapter_file);
+                path.pop();
+                path
+            });
+            let replace_fn = |link: &str| {
+                // If it's a local link, run through the local link replacements.
+                let is_not_url = Url::parse(link).is_err();
+                if let (Some(chapter_path), true) = (&chapter_path_opt, is_not_url) {
+                    let absolute_path = {
+                        let mut path = chapter_path.clone();
+                        path.push(link);
+                        path
+                    };
+                    let relative_path = absolute_path.relative_to(&ctx.root)?.normalize();
+
+                    for (re, replacement) in &local_link_replacements {
+                        if let Cow::Owned(new_link) =
+                            re.replace(relative_path.as_str(), *replacement)
+                        {
+                            return Ok(Some(new_link));
+                        }
+                    }
+                }
+                // If no local link replacements have matched,
+                // run through the link replacements.
+                for (re, replacement) in &link_replacements {
+                    if let Cow::Owned(new_link) = re.replace(link, *replacement) {
+                        return Ok(Some(new_link));
+                    }
+                }
+                Ok(None)
+            };
+
             let content = &chapter.content;
             let ast = md::to_mdast(content, &Default::default()).unwrap();
-            if let Cow::Owned(new_content) = regexreplace_links(content, &ast, &replacements) {
+            // It's safe to unwrap here, because we know `replace_fn` always returns Ok.
+            if let Cow::Owned(new_content) = replace_links(content, &ast, replace_fn).unwrap() {
                 chapter.content = new_content
             }
         };

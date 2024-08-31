@@ -34,7 +34,7 @@ fn main() -> Result<()> {
     handle_preprocessing(&preprocessor)
 }
 
-fn handle_preprocessing(pre: &dyn Preprocessor) -> Result<()> {
+fn handle_preprocessing(pre: &impl Preprocessor) -> Result<()> {
     let (ctx, book) = CmdPreprocessor::parse_input(io::stdin())?;
 
     let book_version = Version::parse(&ctx.mdbook_version)?;
