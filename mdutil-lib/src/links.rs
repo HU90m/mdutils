@@ -112,6 +112,26 @@ mod test {
     #[test]
     fn replace_links_check() -> Result<(), Box<dyn Error>> {
         let input = "[foo](bar.md) <https://bbc.co.uk>\n\n[bar]: ./foo.md\n";
+        let expected =
+            "[foo](https://hugom.uk) <https://git.hugom.uk>\n\n[bar]: https://cloud.hugom.uk\n";
+
+        let ast = md::to_mdast(input, &Default::default()).unwrap();
+        let wrap = |s: &str| Ok(Some(s.to_string()));
+        let replacement_fn = |link: &str| match link {
+            "bar.md" => wrap("https://hugom.uk"),
+            "https://bbc.co.uk" => wrap("https://git.hugom.uk"),
+            "./foo.md" => wrap("https://cloud.hugom.uk"),
+            _ => Ok(None),
+        };
+        let actual = replace_links(input, &ast, replacement_fn).unwrap();
+
+        assert_eq!(actual, expected);
+        Ok(())
+    }
+
+    #[test]
+    fn regexreplace_links_check() -> Result<(), Box<dyn Error>> {
+        let input = "[foo](bar.md) <https://bbc.co.uk>\n\n[bar]: ./foo.md\n";
         let expected = "[foo](https://hugom.uk) <https://hugom.uk>\n\n[bar]: https://hugom.uk\n";
 
         let ast = md::to_mdast(input, &Default::default()).unwrap();
@@ -119,7 +139,6 @@ mod test {
         let actual = regexreplace_links(input, &ast, &replacements);
 
         assert_eq!(actual, expected);
-
         Ok(())
     }
 }
