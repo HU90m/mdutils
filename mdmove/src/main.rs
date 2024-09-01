@@ -11,7 +11,7 @@ use anyhow::{anyhow, Result};
 use clap::Parser;
 use pathdiff::diff_paths;
 
-use mdutil_lib::{links::replace_links, markdown as md};
+use mdutils::{links::replace_links, markdown as md};
 
 #[derive(Debug, Default)]
 struct MoveList(HashMap<PathBuf, PathBuf>);

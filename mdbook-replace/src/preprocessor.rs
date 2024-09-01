@@ -5,7 +5,7 @@ use mdbook::book::{Book, BookItem};
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
 use toml::value::{Table, Value};
 
-use mdutil_lib::{links::replace_links, markdown as md, regex::Regex};
+use mdutils::{links::replace_links, markdown as md, regex::Regex};
 use relative_path::PathExt;
 use url::Url;
 
@@ -53,7 +53,7 @@ impl RegexReplace {
 
 impl Preprocessor for RegexReplace {
     fn name(&self) -> &str {
-        "regexreplace"
+        "replace"
     }
 
     fn run(&self, ctx: &PreprocessorContext, mut book: Book) -> Result<Book> {
@@ -139,7 +139,7 @@ mod test {
                         "title": "TITLE"
                     },
                     "preprocessor": {
-                        "regexreplace": {
+                        "replace": {
                             "link_replacements": [
                                 { "regex": ".*", "replacement": "https://hugom.uk" }
                             ]

@@ -5,8 +5,8 @@ use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
-use mdutil_lib::headings::get_title;
-use mdutil_lib::markdown as md;
+use mdutils::headings::get_title;
+use mdutils::markdown as md;
 
 const SUMMARY_MD: &str = "SUMMARY.md";
 

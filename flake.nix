@@ -35,7 +35,7 @@
           type = "app";
           program = "${mdutils}/bin/${binName}";
         };
-      }) ["mdsummary" "mdmove" "mdbook-regexreplace"]);
+      }) ["mdsummary" "mdmove" "mdbook-replace"]);
     };
   in
     flake-utils.lib.eachDefaultSystem system_outputs;

@@ -471,13 +471,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "mdbook-regexreplace"
+name = "mdbook-replace"
 version = "0.0.1"
 dependencies = [
  "anyhow",
  "clap",
  "mdbook",
- "mdutil-lib",
+ "mdutils",
  "relative-path",
  "semver",
  "serde_json",
@@ -491,7 +491,7 @@ version = "0.0.1"
 dependencies = [
  "anyhow",
  "clap",
- "mdutil-lib",
+ "mdutils",
  "pathdiff",
  "url",
 ]
@@ -503,12 +503,12 @@ dependencies = [
  "anyhow",
  "clap",
  "glob",
- "mdutil-lib",
+ "mdutils",
  "prettydiff",
 ]
 
 [[package]]
-name = "mdutil-lib"
+name = "mdutils"
 version = "0.0.1"
 dependencies = [
  "anyhow",
