@@ -4,8 +4,8 @@ version = "0.0.1"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0.75"
-clap = { version = "4.4.0", features = ["deprecated", "derive"] }
-mdutils = { path = "../mdutils", version = "0.0.1" }
+mdutils = { workspace = true }
+anyhow = { workspace = true }
+clap = { workspace = true }
+url = { workspace = true }
 pathdiff = "0.2.1"
-url = "2.4.1"
