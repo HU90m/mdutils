@@ -500,6 +500,8 @@ dependencies = [
  "markdown",
  "once_cell",
  "regex",
+ "tree-sitter",
+ "tree-sitter-md",
 ]
 
 [[package]]
@@ -866,6 +868,26 @@ name = "topological-sort"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea68304e134ecd095ac6c3574494fc62b909f416c4fca77e440530221e549d3d"
+
+[[package]]
+name = "tree-sitter"
+version = "0.21.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "705bf7c0958d0171dd7d3a6542f2f4f21d87ed5f1dc8db52919d3a6bed9a359a"
+dependencies = [
+ "cc",
+ "regex",
+]
+
+[[package]]
+name = "tree-sitter-md"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d9c3cfd068f2527250bbd8ff407431164e12b17863e7eafb76e311dd3f96965a"
+dependencies = [
+ "cc",
+ "tree-sitter",
+]
 
 [[package]]
 name = "typenum"

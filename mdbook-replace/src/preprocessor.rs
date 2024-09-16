@@ -5,7 +5,7 @@ use mdbook::book::{Book, BookItem};
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
 use toml::value::{Table, Value};
 
-use mdutils::{links::replace_links, markdown as md, regex::Regex};
+use mdutils::{links::replace_links, regex::Regex};
 use relative_path::PathExt;
 use url::Url;
 
@@ -104,9 +104,8 @@ impl Preprocessor for RegexReplace {
             };
 
             let content = &chapter.content;
-            let ast = md::to_mdast(content, &Default::default()).unwrap();
             // It's safe to unwrap here, because we know `replace_fn` always returns Ok.
-            if let Cow::Owned(new_content) = replace_links(content, &ast, replace_fn).unwrap() {
+            if let Cow::Owned(new_content) = replace_links(content, replace_fn).unwrap() {
                 chapter.content = new_content
             }
         };

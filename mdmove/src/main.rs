@@ -11,7 +11,7 @@ use anyhow::{anyhow, Result};
 use clap::Parser;
 use pathdiff::diff_paths;
 
-use mdutils::{links::replace_links, markdown as md};
+use mdutils::links::replace_links;
 
 #[derive(Debug, Default)]
 struct MoveList(HashMap<PathBuf, PathBuf>);
@@ -166,7 +166,6 @@ fn change_file(file: &Path, moves: &MoveList, root: &Path) -> Result<ChangeList>
     let file_dest_dir = file_dest.parent().unwrap();
 
     let content = fs::read_to_string(file)?;
-    let ast = md::to_mdast(&content, &Default::default()).unwrap();
 
     let replacement = |link: &str| {
         // 1. make link absolute based on current file dir or root
@@ -218,7 +217,7 @@ fn change_file(file: &Path, moves: &MoveList, root: &Path) -> Result<ChangeList>
         }
         Ok(Some(new_link))
     };
-    if let Cow::Owned(new_content) = replace_links(&content, &ast, replacement)? {
+    if let Cow::Owned(new_content) = replace_links(&content, replacement)? {
         change_list.insert(file_dest, new_content);
     };
     Ok(change_list)
