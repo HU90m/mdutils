@@ -10,8 +10,8 @@ use semver::{Version, VersionReq};
 use preprocessor::RegexReplace;
 
 pub fn cli() -> Command {
-    Command::new("mdbook-regexreplace")
-        .about("A mdbook preprocessor that parses the markdown and replaces regex matches")
+    Command::new("mdbook-replace")
+        .about("A mdbook preprocessor that parses the markdown and replaces regex matches.")
         .subcommand(
             Command::new("supports")
                 .arg(Arg::new("renderer").required(true))
