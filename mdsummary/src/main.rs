@@ -6,7 +6,6 @@ use std::path::{Path, PathBuf};
 use std::{env, fs};
 
 use mdutils::headings::get_title;
-use mdutils::markdown as md;
 
 const SUMMARY_MD: &str = "SUMMARY.md";
 
@@ -132,8 +131,7 @@ impl Summary {
 
 fn title_from_md_file(path: &Path) -> Result<String> {
     let content = fs::read_to_string(path)?;
-    let ast = md::to_mdast(&content, &Default::default()).unwrap();
-    if let Some(title) = get_title(&ast, &content) {
+    if let Some(title) = get_title(&content) {
         Ok(title.to_string())
     } else {
         let Some(name) = path.file_stem().and_then(OsStr::to_str) else {

@@ -4,6 +4,8 @@ use std::borrow::Cow;
 use anyhow::Result;
 use tree_sitter_md::MarkdownParser;
 
+/// Returns the byte range of every link found in the input markdown.
+/// The returned vector may not be ordered.
 pub fn get_links(input: &str) -> Vec<Range<usize>> {
     let tree = {
         let mut parser = MarkdownParser::default();
