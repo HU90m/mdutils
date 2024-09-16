@@ -2,6 +2,7 @@ use core::ops::Range;
 use std::borrow::Cow;
 
 use anyhow::Result;
+use tree_sitter::{Query, QueryCursor};
 use tree_sitter_md::MarkdownParser;
 
 /// Returns the byte range of every link found in the input markdown.
@@ -11,14 +12,13 @@ pub fn get_links(input: &str) -> Vec<Range<usize>> {
         let mut parser = MarkdownParser::default();
         parser.parse(input.as_bytes(), None).unwrap()
     };
-    let mut query_cur = tree_sitter::QueryCursor::new();
+    let mut query_cur = QueryCursor::new();
 
     // There are two different tree types needed to express a markdown document.
     // A top level 'block' tree and a number of inline trees.
     // We need a different query for each.
-    let block_query =
-        tree_sitter::Query::new(&tree_sitter_md::language(), "(link_destination) @link").unwrap();
-    let inline_query = tree_sitter::Query::new(
+    let block_query = Query::new(&tree_sitter_md::language(), "(link_destination) @link").unwrap();
+    let inline_query = Query::new(
         &tree_sitter_md::inline_language(),
         "[(link_destination) (uri_autolink)] @link",
     )
