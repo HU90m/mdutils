@@ -5,7 +5,8 @@ use mdbook::book::{Book, BookItem};
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
 use toml::value::{Table, Value};
 
-use mdutils::{links::replace_links, regex::Regex};
+use mdutils::links::replace_links;
+use regex::Regex;
 use relative_path::PathExt;
 use url::Url;
 

@@ -1,7 +1,6 @@
 pub mod headings;
 pub mod links;
 pub use markdown;
-pub use regex;
 
 use core::ops::Range;
 use markdown::unist::Position;
