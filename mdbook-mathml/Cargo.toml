@@ -1,0 +1,18 @@
+[package]
+name = "mdbook-mathml"
+version = "0.0.1"
+edition = "2021"
+
+[dependencies]
+mdutils = { workspace = true }
+anyhow = { workspace = true }
+clap = { workspace = true }
+url = { workspace = true }
+mdbook = { version = "0.4.34", default-features = false }
+regex = "1.9.3"
+semver = "1.0.18"
+serde_json = "1.0.105"
+toml = "0.5.11"
+relative-path = "1.9.3"
+latex2mathml = "0.2.3"
+pulldown-cmark = "0.12.2"

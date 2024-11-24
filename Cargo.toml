@@ -5,6 +5,7 @@ members = [
     "mdmove",
     "mdsummary",
     "mdbook-replace",
+    "mdbook-mathml",
 ]
 
 [workspace.dependencies]
